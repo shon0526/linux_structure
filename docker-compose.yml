@@ -9,8 +9,8 @@ services:
     volumes:
       - ./:/workspace
       # ダウンロードした crate をキャッシュして、コンテナ再作成後も再取得しない
-      - cargo-registry:/home/dev/.cargo/registry
-      - cargo-git:/home/dev/.cargo/git
+      - cargo-registry:/home/ubuntu/.cargo/registry
+      - cargo-git:/home/ubuntu/.cargo/git
     working_dir: /workspace
     tty: true
     stdin_open: true
