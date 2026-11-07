@@ -1,8 +1,6 @@
-FROM ubuntu:20.04
+FROM ubuntu:24.04
 
-ARG USERNAME=dev
-ARG USER_UID=1000
-ARG USER_GID=1000
+ARG USERNAME=ubuntu
 
 ENV DEBIAN_FRONTEND=noninteractive \
     TZ=Asia/Tokyo \
@@ -19,12 +17,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libssl-dev \
         sudo \
         tzdata \
+        sysstat \
+        strace \
+        lld \
     && rm -rf /var/lib/apt/lists/*
 
-# 作業ユーザー
-RUN groupadd --gid ${USER_GID} ${USERNAME} \
-    && useradd --uid ${USER_UID} --gid ${USER_GID} -m -s /bin/bash ${USERNAME} \
-    && echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${USERNAME}
+# 作業ユーザー（ubuntu:24.04 には ubuntu ユーザー(UID/GID 1000)が最初から入っているのでそれを使う）
+RUN echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${USERNAME}
 
 USER ${USERNAME}
 WORKDIR /home/${USERNAME}
@@ -38,7 +37,7 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
 # rust-toolchain.toml で固定したバージョンとコンポーネントを事前にインストールし、
 # /workspace 以外でも同じバージョンを使うようデフォルトに設定
 WORKDIR /workspace
-COPY --chown=${USERNAME}:${USERNAME} rust-toolchain.toml ./
+COPY --chown=${USERNAME}:${USERNAME} rust-toolchain ./
 RUN rustup toolchain install \
     && rustup default "$(rustup show active-toolchain | cut -d' ' -f1)"
 
